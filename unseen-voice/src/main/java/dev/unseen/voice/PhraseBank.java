@@ -102,8 +102,13 @@ public class PhraseBank implements AutoCloseable {
 		if (name == null || name.isBlank()) {
 			name = playerName.replace('_', ' ');
 		}
+		List<String> all = new ArrayList<>(this.config.phrases);
+		List<String> extra = this.store.player(player).phrases;
+		if (extra != null) {
+			all.addAll(extra);
+		}
 		List<String> out = new ArrayList<>();
-		for (String phrase : this.config.phrases) {
+		for (String phrase : all) {
 			String text = phrase.replace("{name}", name).strip();
 			if (!text.isEmpty() && !out.contains(text)) {
 				out.add(text);

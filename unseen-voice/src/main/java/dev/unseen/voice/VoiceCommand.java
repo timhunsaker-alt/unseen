@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.UUID;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -18,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
  *   /unseenvoice status           what it has of yours
  *   /unseenvoice nickname <text>  how your name should be said ("Timmy" for tim_h)
  *   /unseenvoice build            (op) make your phrases now instead of waiting
+ *   /unseenvoice phrase <player> <text>   (op) add a sentence for that player; it's made and kept for later
  */
 public final class VoiceCommand {
 	private VoiceCommand() {
@@ -30,6 +32,10 @@ public final class VoiceCommand {
 				.then(Commands.literal("status").executes(VoiceCommand::status))
 				.then(Commands.literal("nickname")
 						.then(Commands.argument("text", StringArgumentType.greedyString()).executes(VoiceCommand::nickname)))
+				.then(Commands.literal("phrase")
+						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+						.then(Commands.argument("player", EntityArgument.player())
+								.then(Commands.argument("text", StringArgumentType.greedyString()).executes(VoiceCommand::phrase))))
 				.then(Commands.literal("build")
 						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.executes(VoiceCommand::build)));
@@ -112,6 +118,26 @@ public final class VoiceCommand {
 		say(ctx, started ? "Making phrases. It can take a while; check /unseenvoice status."
 				: "Nothing to do: not opted in, or already building.");
 		return started ? 1 : 0;
+	}
+
+	private static int phrase(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+		VoiceStore store = UnseenVoice.store();
+		PhraseBank bank = UnseenVoice.bank();
+		if (store == null || bank == null) {
+			return fail(ctx);
+		}
+		String text = StringArgumentType.getString(ctx, "text");
+		if (!store.addPhrase(target.getUUID(), text)) {
+			say(ctx, "Not added: it's empty, over 200 characters, a duplicate, or that player already has 40.");
+			return 0;
+		}
+		boolean building = UnseenVoice.config().hasVoiceServer() && store.isOptedIn(target.getUUID())
+				&& bank.request(target.getUUID(), target.getName().getString());
+		say(ctx, "Added for " + target.getName().getString() + ": \"" + text.strip() + "\". "
+				+ (building ? "Making it now; it's kept for later."
+				: "It'll be made when their voice is ready (they must have opted in, with a voice server set)."));
+		return 1;
 	}
 
 	private static int fail(CommandContext<CommandSourceStack> ctx) {

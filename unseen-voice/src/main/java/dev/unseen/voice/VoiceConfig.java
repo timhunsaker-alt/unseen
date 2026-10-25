@@ -29,8 +29,9 @@ public class VoiceConfig {
 	/**
 	 * How hard the voice server works on each phrase. Time grows with it: on a busy 4-CPU server about
 	 * 26 s at 4, 48 s at 8, 96 s at 16 (VoiceStudio's own default), and phrases get cleaner as it goes up.
+	 * Phrases are made once, in the background, and kept, so speed hardly matters; 32 is the ceiling.
 	 */
-	public int numStep = 8;
+	public int numStep = 16;
 	/** Build each player's phrase bank on its own once enough clips are saved. */
 	public boolean autoBuildBank = true;
 	/** Seconds of recorded speech needed (and used at most) as the reference for cloning. */
@@ -38,7 +39,7 @@ public class VoiceConfig {
 	public int maxReferenceSeconds = 14;
 	/** {name} becomes the player's nickname, or their name with underscores turned into spaces. */
 	public List<String> phrases = List.of("hey", "hey, over here", "over here", "is that you?", "come here",
-			"{name}", "{name}?", "hey {name}");
+			"wait for me", "where did you go?", "{name}", "{name}?", "hey {name}", "{name}, come here");
 
 	// --- Recording (only for players who typed /unseenvoice optin) ---
 

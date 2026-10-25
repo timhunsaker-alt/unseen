@@ -42,6 +42,7 @@ Without a voice server it still works: it replays short clips of what players ac
 | `/unseenvoice status` | Clips saved, whether your voice is made, how many phrases are ready. |
 | `/unseenvoice nickname <text>` | How your name should be said, for example `Timmy` for `tim_h2009`. |
 | `/unseenvoice build` | (op) Make your phrases now instead of waiting. |
+| `/unseenvoice phrase <player> <text>` | (op) Add a sentence for that player. It's made in their voice and kept for later. Up to 40 each. |
 
 Testing a scare right away: `/unseen dread 5`, then `/unseen trigger voice`. It needs you to have opted in,
 have clips or phrases saved, and have voice chat connected.
@@ -54,8 +55,9 @@ OpenAI-style speech API. These steps follow its Docker documentation.
 Needs: an x86-64 Linux machine (its image has no ARM version), Docker, about 6 GB of disk for the image and models,
 and about 5 GB of RAM while a model is loaded. Without a GPU phrases are slow, which is why they are made in advance.
 Measured on a shared 4-CPU container: the first request takes a couple of minutes (it loads the model), then a short
-phrase takes about 26 seconds at `numStep` 4, 48 at 8, and 96 at 16. A player's whole bank of eight phrases takes
-roughly five to ten minutes at the default of 8.
+phrase takes about 26 seconds at `numStep` 4, 48 at 8, and 96 at 16. A player's bank of eleven phrases takes
+about twenty minutes at the default of 16. That's a one-time background job: every phrase is saved as a file and
+reused, so speed doesn't matter during play.
 
 ```bash
 # 1. A secret key. Keep it; the mod needs it too.
@@ -91,7 +93,7 @@ Restart the Minecraft server. Players who have opted in and have enough clips ge
 | Setting | What it does |
 |---|---|
 | `voiceStudioUrl`, `apiKey`, `model`, `language` | The voice server. Leave the URL empty to only replay clips. `language` is as VoiceStudio names it, for example `English`. |
-| `numStep` | How hard the voice server works per phrase. Higher is cleaner and slower (4, 8 or 16). Default 8. |
+| `numStep` | How hard the voice server works per phrase. Higher is cleaner and slower (4, 8, 16, up to 32). Default 16. |
 | `phrases` | What it can say. `{name}` becomes the nickname, or the player's name. |
 | `autoBuildBank` | Make each player's phrases automatically. |
 | `minReferenceSeconds` / `maxReferenceSeconds` | How much recorded speech is used to clone a voice. |

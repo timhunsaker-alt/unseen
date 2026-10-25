@@ -40,6 +40,8 @@ public class VoiceStore {
 		/** Name of their cloned voice on the voice server, once made. */
 		public String voice;
 		public String profileId;
+		/** Extra sentences added with /unseenvoice phrase, said in addition to the configured ones. */
+		public List<String> phrases = new ArrayList<>();
 	}
 
 	private final Path root;
@@ -78,6 +80,21 @@ public class VoiceStore {
 	public synchronized void setNickname(UUID id, String nickname) {
 		this.player(id).nickname = nickname == null || nickname.isBlank() ? null : nickname.strip();
 		this.save();
+	}
+
+	/** Adds a sentence for this player. False if it's a duplicate or they have too many already. */
+	public synchronized boolean addPhrase(UUID id, String phrase) {
+		Player p = this.player(id);
+		if (p.phrases == null) {
+			p.phrases = new ArrayList<>();
+		}
+		String text = phrase.strip();
+		if (text.isEmpty() || text.length() > 200 || p.phrases.size() >= 40 || p.phrases.contains(text)) {
+			return false;
+		}
+		p.phrases.add(text);
+		this.save();
+		return true;
 	}
 
 	public synchronized List<UUID> optedInPlayers() {
