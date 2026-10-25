@@ -75,7 +75,23 @@ public class VoiceConfig {
 			}
 		}
 		config.save(file); // writes new settings in too, so the file always shows every option
+		config.applyEnvironment(); // after saving, so a key set this way never ends up in the file
 		return config;
+	}
+
+	/**
+	 * UNSEEN_VOICE_URL and UNSEEN_VOICE_API_KEY, if set, win over the file. Handy for Docker, where the
+	 * address and key belong in the environment and not in a file.
+	 */
+	private void applyEnvironment() {
+		String url = System.getenv("UNSEEN_VOICE_URL");
+		if (url != null && !url.isBlank()) {
+			this.voiceStudioUrl = url.strip();
+		}
+		String key = System.getenv("UNSEEN_VOICE_API_KEY");
+		if (key != null && !key.isBlank()) {
+			this.apiKey = key.strip();
+		}
 	}
 
 	private void save(Path file) {

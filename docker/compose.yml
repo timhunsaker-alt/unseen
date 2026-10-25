@@ -1,0 +1,75 @@
+# Unseen on Docker: a Minecraft server with the mods, and (optionally) the voice cloning server.
+#
+#   cp .env.example .env      then edit .env (read the EULA link in it first)
+#   docker compose up -d
+#   docker compose logs -f minecraft
+#
+# Needs an x86-64 machine for the optional voice server (its image has no ARM build).
+
+services:
+  minecraft:
+    image: itzg/minecraft-server:java25
+    container_name: unseen-minecraft
+    restart: unless-stopped
+    tty: true          # lets `docker attach` / `docker exec -i ... rcon-cli` talk to the console
+    stdin_open: true
+    ports:
+      - "25565:25565/tcp"   # Minecraft
+      - "24454:24454/udp"   # Simple Voice Chat (voice does not work without this)
+    environment:
+      # Set EULA=TRUE in .env only after reading https://aka.ms/MinecraftEULA
+      EULA: "${EULA:-FALSE}"
+      TYPE: FABRIC
+      VERSION: "26.3"
+      MEMORY: "${MEMORY:-4G}"
+      # Real accounts only, and only people you list.
+      ONLINE_MODE: "TRUE"
+      ENABLE_WHITELIST: "TRUE"
+      ENFORCE_WHITELIST: "TRUE"
+      WHITELIST: "${WHITELIST:-}"
+      OPS: "${OPS:-}"
+      # Fabric API and Simple Voice Chat, from Modrinth. Pinned to exact versions that work together.
+      MODRINTH_PROJECTS: |
+        fabric-api:EQKgpeKu
+        simple-voice-chat:cZm965sW
+      # Unseen and the voice companion, from this repository's dist/ folder.
+      MODS: |
+        https://raw.githubusercontent.com/timhunsaker-alt/unseen/main/dist/unseen-0.1.0.jar
+        https://raw.githubusercontent.com/timhunsaker-alt/unseen/main/dist/unseen-voice-0.1.0.jar
+      # Where the voice server is, and its key. Leave the URL empty to only replay recorded clips.
+      UNSEEN_VOICE_URL: "${UNSEEN_VOICE_URL:-}"
+      UNSEEN_VOICE_API_KEY: "${UNSEEN_VOICE_API_KEY:-}"
+    volumes:
+      - ./data:/data
+
+  # The voice cloning server (VoiceStudio, CPU only). Only started when COMPOSE_PROFILES=voice is set in .env.
+  # Not published to the internet: only the Minecraft container reaches it, at http://voicestudio:3900
+  voicestudio:
+    image: ghcr.io/debpalash/voicestudio:0.5.6
+    container_name: unseen-voicestudio
+    profiles: ["voice"]
+    restart: unless-stopped
+    environment:
+      OMNIVOICE_API_KEY: "${UNSEEN_VOICE_API_KEY:-}"
+      OMNIVOICE_SERVER_MODE: "1"
+      OMNIVOICE_ANALYTICS_DISABLED: "1"
+      OMNIVOICE_DATA_DIR: /app/omnivoice_data
+      HF_HOME: /app/omnivoice_data/huggingface
+      PYTHONPATH: /app/backend
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "${VOICE_THREADS:-4}"
+    volumes:
+      - voicestudio-data:/app/omnivoice_data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3900/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+volumes:
+  voicestudio-data:

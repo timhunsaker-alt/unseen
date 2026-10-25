@@ -15,7 +15,27 @@ Linux is assumed for the server; the steps are the same on macOS apart from the 
 | `unseen-voice-0.1.0.jar` | yes | **no** (server only) |
 | VoiceStudio (voice cloning) | reachable from the server | no |
 
-## 1. The server
+## Easiest: Docker (Ubuntu or any machine with Docker)
+
+Everything below in one go: the Minecraft server with all four mods, and optionally the voice cloning server.
+
+```bash
+git clone https://github.com/timhunsaker-alt/unseen.git && cd unseen/docker
+cp .env.example .env
+nano .env            # set EULA=TRUE (after reading the link in the file), WHITELIST and OPS to your Minecraft names
+docker compose up -d
+docker compose logs -f minecraft      # wait for "Done" and for the voice chat to start
+```
+
+For voice cloning, in `.env` also uncomment `COMPOSE_PROFILES=voice`, `UNSEEN_VOICE_URL=http://voicestudio:3900`, and set
+`UNSEEN_VOICE_API_KEY` to a long random string. The voice server then runs next to Minecraft, is not published to the internet,
+and Minecraft reaches it by name. Open ports 25565/TCP and 24454/UDP, then continue at "4. Each player" below.
+
+Updating after the repository changes: `git pull && docker compose pull && docker compose up -d --force-recreate`.
+
+The rest of this page is the same setup done by hand, without Docker.
+
+## 1. The server, by hand
 
 ```bash
 mkdir -p ~/unseen-server/mods && cd ~/unseen-server
