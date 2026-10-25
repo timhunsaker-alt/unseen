@@ -68,7 +68,9 @@ The jar is plain Java, so one file works everywhere: `dist/unseen-0.1.0.jar`.
 
 Everyone who joins a world needs the mod (the footprint is a new block).
 
-To rebuild the jar after changes: `./gradlew build`, then copy `build/libs/unseen-0.1.0.jar` (not the `-sources` one) into `dist/`.
+**Optional voice companion:** `dist/unseen-voice-0.1.0.jar` also needs Simple Voice Chat. See [unseen-voice/README.md](unseen-voice/README.md).
+
+To rebuild after changes: `./gradlew build`, then copy `build/libs/unseen-0.1.0.jar` and `unseen-voice/build/libs/unseen-voice-0.1.0.jar` (not the `-sources` ones) into `dist/`.
 
 ## Testing without waiting days
 
