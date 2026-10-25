@@ -79,18 +79,6 @@ public class VoiceStudioClient {
 		}
 	}
 
-	/** Records that the speaker gave permission, using the server's own consent record. */
-	public void attest(String profileId, String basis) throws IOException, InterruptedException {
-		JsonObject json = new JsonObject();
-		json.addProperty("basis", basis);
-		HttpResponse<String> response = this.http.send(this.request("/profiles/" + profileId + "/attestation")
-				.header("Content-Type", "application/json")
-				.POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), HttpResponse.BodyHandlers.ofString());
-		if (response.statusCode() / 100 != 2) {
-			throw new IOException("Recording consent failed: HTTP " + response.statusCode() + " " + response.body());
-		}
-	}
-
 	/** Says {@code text} in the named voice. Returns 24 kHz, 16-bit, mono samples. */
 	public short[] speak(String voice, String text) throws IOException, InterruptedException {
 		JsonObject json = new JsonObject();
@@ -98,6 +86,7 @@ public class VoiceStudioClient {
 		json.addProperty("input", text);
 		json.addProperty("voice", voice);
 		json.addProperty("response_format", "pcm");
+		json.addProperty("num_step", this.config.numStep);
 		HttpResponse<byte[]> response = this.http.send(this.request("/v1/audio/speech")
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(json.toString())).build(), HttpResponse.BodyHandlers.ofByteArray());

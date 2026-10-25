@@ -24,7 +24,13 @@ public class VoiceConfig {
 	/** The OMNIVOICE_API_KEY you gave the server. Sent as a Bearer token. */
 	public String apiKey = "";
 	public String model = "omnivoice";
-	public String language = "en";
+	/** As VoiceStudio names it, for example "English". */
+	public String language = "English";
+	/**
+	 * How hard the voice server works on each phrase. Time grows with it: on a busy 4-CPU server about
+	 * 26 s at 4, 48 s at 8, 96 s at 16 (VoiceStudio's own default), and phrases get cleaner as it goes up.
+	 */
+	public int numStep = 8;
 	/** Build each player's phrase bank on its own once enough clips are saved. */
 	public boolean autoBuildBank = true;
 	/** Seconds of recorded speech needed (and used at most) as the reference for cloning. */

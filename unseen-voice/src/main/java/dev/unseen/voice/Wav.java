@@ -88,7 +88,8 @@ public final class Wav {
 		if (from == to || in.length == 0) {
 			return in;
 		}
-		return stretch(in, (double) to / from);
+		// Going to a higher rate needs more samples, which stretch() calls a speed below 1.
+		return stretch(in, (double) from / to);
 	}
 
 	/**

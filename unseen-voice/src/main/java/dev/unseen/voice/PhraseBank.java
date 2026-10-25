@@ -20,7 +20,8 @@ import java.util.concurrent.Executors;
  * so nothing slow ever happens mid-game (on a CPU-only server a phrase takes seconds to make).
  *
  * Steps for one player: stitch their saved clips into a reference recording, ask the voice
- * server to clone it, record consent, then generate every configured phrase one at a time.
+ * server to clone it, then generate every configured phrase one at a time. (Consent is the
+ * player's own /unseenvoice optin; VoiceStudio 0.5.6 has no way to be told about it automatically.)
  */
 public class PhraseBank implements AutoCloseable {
 	/** Don't retry a failed build for this long. */
@@ -124,9 +125,6 @@ public class PhraseBank implements AutoCloseable {
 				}
 				String voice = "unseen-" + player.toString().substring(0, 8);
 				String profileId = this.client.createProfile(voice, reference);
-				if (profileId != null) {
-					this.client.attest(profileId, "Speaker opted in with /unseenvoice optin on this server.");
-				}
 				entry.voice = voice;
 				entry.profileId = profileId;
 				this.store.saveNow();
