@@ -68,6 +68,9 @@ public final class PhotoCamera {
 				}
 				player.setXRot(POSE_PITCH);
 				player.xRotO = POSE_PITCH;
+				// The bed screen (Leave Bed button + chat bar) isn't part of the HUD, so hiding the HUD
+				// doesn't remove it. Drop it for this frame; Gui.tick reopens it at the start of the next tick.
+				client.gui.setScreen(null);
 				phase = Phase.SHOOTING; // let at least one frame render like this
 			}
 			case SHOOTING -> {

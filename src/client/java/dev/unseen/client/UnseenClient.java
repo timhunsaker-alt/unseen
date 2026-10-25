@@ -11,5 +11,6 @@ public class UnseenClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(SnapRequestPayload.TYPE,
 				(payload, context) -> PhotoCamera.request(payload.nonce()));
 		ClientTickEvents.END_CLIENT_TICK.register(PhotoCamera::tick);
+		TitleBackground.register();
 	}
 }
