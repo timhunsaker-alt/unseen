@@ -68,7 +68,7 @@ public final class Director {
 
 	private final Random random = new Random();
 	private final FootstepsEvent footsteps = new FootstepsEvent();
-	private final List<HauntEvent> events = List.of(
+	private final List<HauntEvent> events = new ArrayList<>(List.of(
 			new FootprintsEvent(),
 			new MissingTorchEvent(),
 			new OpenDoorEvent(),
@@ -90,7 +90,7 @@ public final class Director {
 			new SortedChestEvent(),
 			new CandleEvent(),
 			new DoorstepEvent(),
-			this.footsteps);
+			this.footsteps));
 
 	/** Things that happen a few seconds from now (a second knock, the next torch going out). */
 	private record Delayed(long due, Runnable task) {
@@ -137,7 +137,15 @@ public final class Director {
 	}
 
 	public List<HauntEvent> events() {
-		return this.events;
+		return java.util.Collections.unmodifiableList(this.events);
+	}
+
+	/**
+	 * Lets another mod add its own scares (the voice companion does this).
+	 * Call during mod initialization, before the world starts.
+	 */
+	public void register(HauntEvent event) {
+		this.events.add(event);
 	}
 
 	public PlayerRecord record(ServerPlayer player) {

@@ -10,3 +10,6 @@ pluginManagement {
 }
 
 rootProject.name = 'unseen'
+
+// The voice companion mod: records and replays players' voices through Simple Voice Chat.
+include 'unseen-voice'

@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "unseen-voice",
+	"version": "${version}",
+	"name": "Unseen Voice",
+	"description": "Companion to Unseen. It remembers how you sound.",
+	"authors": [
+		"Your names here"
+	],
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.unseen.voice.UnseenVoice"
+		],
+		"voicechat": [
+			"dev.unseen.voice.UnseenVoicePlugin"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*",
+		"unseen": "*",
+		"voicechat": "*"
+	}
+}
