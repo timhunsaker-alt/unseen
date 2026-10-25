@@ -59,7 +59,7 @@ public class JournalEvent implements HauntEvent {
 			return false;
 		}
 
-		long day = record.activeTicks / Tuning.GAME_DAY + 1;
+		long day = record.activeTicks / Tuning.GAME_DAY;
 		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
 		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(
 				Filterable.passThrough("Day " + day), "", 0, pages(record, home, day, random), true));

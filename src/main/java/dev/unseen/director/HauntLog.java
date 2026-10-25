@@ -116,7 +116,7 @@ public final class HauntLog {
 	}
 
 	public static long dayOf(ServerLevel level) {
-		return level.getOverworldClockTime() / 24000 + 1;
+		return level.getOverworldClockTime() / 24000;
 	}
 
 	/** Minutes since midnight on the game's clock (its day begins at 6:00). */
