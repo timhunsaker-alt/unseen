@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "unseen",
+	"version": "${version}",
+	"name": "Unseen",
+	"description": "Something else is in your world. You will never see it.",
+	"authors": [
+		"Your names here"
+	],
+	"license": "CC0-1.0",
+	"icon": "assets/unseen/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.unseen.Unseen"
+		],
+		"client": [
+			"dev.unseen.client.UnseenClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
