@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
  * Needs cheats / operator. Remove or keep secret before sharing the mod.
  *
  *   /unseen status
- *   /unseen trigger <footprints|torch|door|footsteps|photo>
+ *   /unseen trigger <event id (tab-complete lists them)|photo|bedturn>
  *   /unseen dread <0-5>      (or -1 to go back to normal)
  */
 public final class UnseenCommand {
@@ -37,6 +37,7 @@ public final class UnseenCommand {
 										builder.suggest(event.id());
 									}
 									builder.suggest("photo");
+									builder.suggest("bedturn");
 									return builder.buildFuture();
 								})
 								.executes(UnseenCommand::trigger)))
@@ -73,6 +74,12 @@ public final class UnseenCommand {
 		if (id.equals("photo")) {
 			record.forcePhotoNextSleep = true;
 			ctx.getSource().sendSuccess(() -> Component.literal("Next time you sleep, it takes a picture."), false);
+			return 1;
+		}
+
+		if (id.equals("bedturn")) {
+			record.forceBedTurnNextWake = true;
+			ctx.getSource().sendSuccess(() -> Component.literal("Next time you wake up, you'll be facing a wall."), false);
 			return 1;
 		}
 

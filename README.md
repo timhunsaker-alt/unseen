@@ -8,13 +8,32 @@ You never see it. It never explains itself. You just find things.
 The "entity" has no body, no model, no AI. It's a **director**: it watches each
 player, slowly gets bolder, and waits for moments when nobody is looking.
 
-| Scare | When | What you find |
+| Scare (`/unseen trigger <id>`) | When | What you find |
 |---|---|---|
 | `footprints` | Dread 1+, in snow | A trail walking up to your house and stopping. None leading away. Or a trail that ends 3 blocks behind where you're standing. Prints slowly fill back in with snow. |
-| `torch` | Dread 1+, you're away from home | One torch in your house is gone. It's in your chest. |
-| `door` | Dread 1+, you're away from home | The door you closed is open. Iron doors too. |
+| `circle` | Dread 3+, you're indoors at home, in snow | Prints that walk a slow circle around your house on the side you weren't looking. The last one turns to face the building. |
+| `windowprints` | Dread 3+, away from home, in snow | Prints that walk up to one of your windows and stop. |
+| `torch` | Dread 1+, away from home | One torch in your house is gone. It's in your chest. |
+| `torchtrail` | Dread 2+ | Torches you left behind you go out one at a time, the farthest first, each one closer. |
+| `door` | Dread 1+, away from home | The door you closed is open. Iron doors too. |
+| `knock` | Dread 2+, you're indoors at home | Three slow knocks on your front door. Nobody's there. |
+| `creak` | Dread 1+, outside near home | A chest in your house opens, then closes. |
 | `footsteps` | Dread 2+ | Steps behind you, in time with yours. They stop when you stop. Sometimes there's one more. |
-| `photo` | Dread 2+, when you sleep | A picture of you asleep, taken from across the room, left in a chest near your bed. |
+| `echo` | Dread 2+ | Your own footsteps, half a second late. They stop when you stop. |
+| `photo` | Dread 2+, when you sleep | A picture of you asleep, left in a chest near your bed. |
+| `journal` | Dread 3+, away from home | An unsigned book in a chest. Small true things about you, like notes. |
+| `map` | Dread 4+, away from home | A map of your base with a red X on your bed. You never made it. |
+| `sign` | Dread 3+, away from home | A sign near your house with something you said in chat written on it. |
+| `deathflower` | Dread 1+, after you die | One flower where you died, once you've walked away. |
+| `doorstep` | Dread 2+, away from home | One flower set on your doorstep. |
+| `candle` | Dread 3+, away from home | A lit candle on the floor by your bed. |
+| `tamper` | Dread 2+, away from home | An item frame turned a notch, or a campfire flipped lit/unlit. |
+| `sorted` | Dread 2+, away from home | One of your chests, sorted. Nothing missing. |
+| `crops` | Dread 2+, away from home | A ripe row of crops harvested and replanted; the harvest is put away in a chest. |
+| `light` | Dread 3+, at night, outdoors | A lantern far off in the dark. Gone when you look away and walk toward it. |
+| `witness` | Dread 2+, animals nearby | Every animal stops and stares at the same empty spot behind you. A pet may growl or hiss. |
+| `bell` | Dread 3+, at night, outdoors | One bell, far away. Roughly once per world. |
+| `bedturn` (not random; hooks into waking) | Dread 3+ | You wake up facing the wall, not the room. Use `/unseen trigger bedturn` then sleep. |
 
 **Dread** (0 to 5) goes up by one for every in-game day you play. At dread 0 nothing
 happens at all, so new worlds feel normal. Higher dread means more frequent events.
@@ -48,6 +67,7 @@ Turn cheats on, then:
 /unseen trigger photo           then go to sleep (needs a chest near the bed)
 /unseen trigger torch           needs a home (sleep once) and you 24+ blocks away
 /unseen trigger door            same, 20+ blocks away
+/unseen trigger <any id above>  tab-complete lists them all; most need a home and distance
 /unseen status                  what it knows about you
 /unseen dread -1                back to normal escalation
 ```
@@ -77,10 +97,12 @@ tools/make_assets.py        draws the footprint shape (edit BOOT to change it)
 3. Always check `Senses.canSee(player, pos)` before touching anything.
 4. Add it to the `events` list in `Director`.
 
-Ideas for next ones: a sign near your house with the last thing you typed in
-chat; your bed's blanket color changed; a single flower where you last died;
-the music disc in your jukebox swapped; an item frame that's rotated every
-morning; your name scratched into a sign deep in a cave you've never been to.
+Events that need cleanup later can override `tickPlayer`; use `Director.get().later(ticks, task)`
+for anything that should happen a few seconds from now.
+
+Ideas for next ones: your bed's blanket color changed; the music disc in your
+jukebox swapped; your name scratched into a sign deep in a cave you've never
+been to; a second photo, from the doorway; a note-block tone from somewhere with no note block.
 
 ## Notes
 

@@ -6,6 +6,8 @@ import dev.unseen.net.SnapRequestPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -51,6 +53,19 @@ public class Unseen implements ModInitializer {
 				Director.get().onStartSleeping(player, sleepingPos);
 			}
 		});
+
+		EntitySleepEvents.STOP_SLEEPING.register((entity, sleepingPos) -> {
+			if (entity instanceof ServerPlayer player) {
+				Director.get().onWake(player);
+			}
+		});
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer player) {
+				Director.get().onDeath(player);
+			}
+		});
+		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) ->
+				Director.get().onChat(sender, message.signedContent()));
 
 		CommandRegistrationCallback.EVENT.register(
 				(dispatcher, buildContext, selection) -> UnseenCommand.register(dispatcher));

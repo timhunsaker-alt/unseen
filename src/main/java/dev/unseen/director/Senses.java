@@ -99,6 +99,44 @@ public final class Senses {
 		return null;
 	}
 
+	/** Every block around the bed (the house) whose state passes {@code test}. */
+	public static List<BlockPos> scanHome(ServerLevel level, BlockPos home, java.util.function.Predicate<BlockState> test) {
+		return scan(level, home, Tuning.HOME_RADIUS, Tuning.HOME_HEIGHT, test);
+	}
+
+	/** Every block in a box around {@code center} whose state passes {@code test}. Never loads chunks. */
+	public static List<BlockPos> scan(ServerLevel level, BlockPos center, int radius, int height,
+			java.util.function.Predicate<BlockState> test) {
+		List<BlockPos> found = new ArrayList<>();
+		for (int x = -radius; x <= radius; x++) {
+			for (int y = -height; y <= height; y++) {
+				for (int z = -radius; z <= radius; z++) {
+					BlockPos pos = center.offset(x, y, z);
+					if (level.hasChunkAt(pos) && test.test(level.getBlockState(pos))) {
+						found.add(pos);
+					}
+				}
+			}
+		}
+		return found;
+	}
+
+	/** True if the player is at least {@code distance} blocks from {@code pos}. */
+	public static boolean farFrom(ServerPlayer player, BlockPos pos, double distance) {
+		return player.distanceToSqr(Vec3.atCenterOf(pos)) >= distance * distance;
+	}
+
+	/** Standing room: air to stand in, air above, and a solid top face below. */
+	public static boolean canStandAt(ServerLevel level, BlockPos pos) {
+		if (!level.hasChunkAt(pos)) {
+			return false;
+		}
+		BlockPos below = pos.below();
+		return level.getBlockState(pos).isAir() && level.getBlockState(pos.above()).isAir()
+				&& level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
+				&& level.getFluidState(below).isEmpty();
+	}
+
 	/** Chests and barrels around a spot, nearest first. */
 	public static List<Container> containersNear(ServerLevel level, BlockPos center) {
 		List<BlockPos> found = new ArrayList<>();

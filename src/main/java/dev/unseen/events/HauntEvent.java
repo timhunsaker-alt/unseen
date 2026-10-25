@@ -28,4 +28,11 @@ public interface HauntEvent {
 	 * Returning false is fine (wrong conditions); the director will try again later.
 	 */
 	boolean run(ServerPlayer player, PlayerRecord record, Random random);
+
+	/**
+	 * Called about once a second for every watched player, whether or not this event is running.
+	 * For events that need to clean up after themselves later.
+	 */
+	default void tickPlayer(ServerPlayer player, PlayerRecord record, long now) {
+	}
 }

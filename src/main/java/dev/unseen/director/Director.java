@@ -3,13 +3,28 @@ package dev.unseen.director;
 import dev.unseen.Unseen;
 import dev.unseen.events.FootprintsEvent;
 import dev.unseen.events.FootstepsEvent;
+import dev.unseen.events.BedTurn;
+import dev.unseen.events.CandleEvent;
+import dev.unseen.events.CreakEvent;
+import dev.unseen.events.CropsEvent;
+import dev.unseen.events.DeathFlowerEvent;
+import dev.unseen.events.DoorstepEvent;
+import dev.unseen.events.EchoEvent;
+import dev.unseen.events.FarBellEvent;
 import dev.unseen.events.FootprintCircleEvent;
 import dev.unseen.events.HauntEvent;
 import dev.unseen.events.JournalEvent;
 import dev.unseen.events.KnockEvent;
+import dev.unseen.events.MapEvent;
 import dev.unseen.events.MissingTorchEvent;
 import dev.unseen.events.OpenDoorEvent;
+import dev.unseen.events.SignEvent;
+import dev.unseen.events.SortedChestEvent;
+import dev.unseen.events.StrayLightEvent;
+import dev.unseen.events.TamperEvent;
 import dev.unseen.events.TorchTrailEvent;
+import dev.unseen.events.WindowPrintsEvent;
+import dev.unseen.events.WitnessEvent;
 import dev.unseen.net.PhotoPayload;
 import dev.unseen.net.SnapRequestPayload;
 import java.util.ArrayList;
@@ -45,7 +60,7 @@ public final class Director {
 	 * Photo maps claim to be from a dimension that doesn't exist, so the game
 	 * never redraws them with real terrain. The picture stays a picture.
 	 */
-	private static final ResourceKey<Level> DARKROOM = ResourceKey.create(Registries.DIMENSION, Unseen.id("darkroom"));
+	public static final ResourceKey<Level> DARKROOM = ResourceKey.create(Registries.DIMENSION, Unseen.id("darkroom"));
 
 	public static Director get() {
 		return INSTANCE;
@@ -61,6 +76,20 @@ public final class Director {
 			new TorchTrailEvent(),
 			new FootprintCircleEvent(),
 			new JournalEvent(),
+			new WitnessEvent(),
+			new CreakEvent(),
+			new FarBellEvent(),
+			new EchoEvent(),
+			new DeathFlowerEvent(),
+			new SignEvent(),
+			new StrayLightEvent(),
+			new TamperEvent(),
+			new MapEvent(),
+			new CropsEvent(),
+			new WindowPrintsEvent(),
+			new SortedChestEvent(),
+			new CandleEvent(),
+			new DoorstepEvent(),
 			this.footsteps);
 
 	/** Things that happen a few seconds from now (a second knock, the next torch going out). */
@@ -141,6 +170,13 @@ public final class Director {
 			// Spread players' rolls out so they don't all happen on the same tick.
 			if ((now / Tuning.SECOND + (player.getUUID().hashCode() & 0xFF)) % (Tuning.CHECK_INTERVAL / Tuning.SECOND) == 0) {
 				this.consider(player, record, now);
+			}
+			for (HauntEvent event : this.events) {
+				try {
+					event.tickPlayer(player, record, now);
+				} catch (RuntimeException e) {
+					Unseen.LOGGER.error("Event {} cleanup failed", event.id(), e);
+				}
 			}
 			if (!record.undeliveredPhotos.isEmpty() && now % (10 * Tuning.SECOND) == 0) {
 				this.retryDeliveries(player, record);
@@ -237,6 +273,52 @@ public final class Director {
 
 	public long now() {
 		return this.state == null ? 0 : this.state.worldTicks();
+	}
+
+	// ---------------------------------------------------------------- things it remembers
+
+	public void onDeath(ServerPlayer player) {
+		if (this.state == null) {
+			return;
+		}
+		PlayerRecord record = this.state.player(player.getUUID());
+		record.deathPos = player.blockPosition().asLong();
+		record.deathDimension = Senses.level(player).dimension().identifier().toString();
+	}
+
+	/** It reads what you say, and keeps the last few things. */
+	public void onChat(ServerPlayer player, String text) {
+		if (this.state == null) {
+			return;
+		}
+		String line = text.strip();
+		if (line.isEmpty()) {
+			return;
+		}
+		if (line.length() > Tuning.CHAT_MAX_LENGTH) {
+			line = line.substring(0, Tuning.CHAT_MAX_LENGTH);
+		}
+		PlayerRecord record = this.state.player(player.getUUID());
+		record.chat.add(line);
+		while (record.chat.size() > Tuning.CHAT_MEMORY) {
+			record.chat.remove(0);
+		}
+	}
+
+	/** After they get out of bed: sometimes they're facing the wall. */
+	public void onWake(ServerPlayer player) {
+		if (this.state == null) {
+			return;
+		}
+		PlayerRecord record = this.state.player(player.getUUID());
+		boolean forced = record.forceBedTurnNextWake;
+		record.forceBedTurnNextWake = false;
+		if (!forced && (record.dread() < Tuning.BED_TURN_MIN_DREAD || this.random.nextDouble() >= Tuning.BED_TURN_CHANCE
+				|| !Senses.isAlone(player))) {
+			return;
+		}
+		// Wait a moment: the game moves them out of bed after this event fires.
+		this.later(3, () -> BedTurn.apply(player));
 	}
 
 	// ---------------------------------------------------------------- sleeping & photos

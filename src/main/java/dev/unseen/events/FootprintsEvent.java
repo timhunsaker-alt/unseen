@@ -112,7 +112,7 @@ public class FootprintsEvent implements HauntEvent {
 	}
 
 	/** Lays prints from {@code from} to {@code to}. All or nothing. */
-	private boolean placeTrail(ServerPlayer player, ServerLevel level, Vec3 from, Vec3 to, int refY) {
+	boolean placeTrail(ServerPlayer player, ServerLevel level, Vec3 from, Vec3 to, int refY) {
 		Vec3 path = to.subtract(from);
 		double length = path.horizontalDistance();
 		if (length < 1) {

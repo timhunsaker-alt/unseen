@@ -100,4 +100,121 @@ public final class Tuning {
 	public static final int JOURNAL_MIN_DREAD = 3;
 	public static final long JOURNAL_COOLDOWN = 3L * GAME_DAY;
 	public static final double JOURNAL_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- Animals that all look at the same empty spot ---
+
+	public static final int WITNESS_MIN_DREAD = 2;
+	public static final long WITNESS_COOLDOWN = GAME_DAY / 2;
+	public static final double WITNESS_RADIUS = 24.0;
+	public static final int WITNESS_MIN_ANIMALS = 2;
+	/** How far behind the player the animals stare. */
+	public static final double WITNESS_SPOT_DISTANCE = 14.0;
+	public static final int WITNESS_DURATION = 5 * SECOND;
+
+	// --- Chest creak (a chest opens and closes in your house while you're outside) ---
+
+	public static final int CREAK_MIN_DREAD = 1;
+	public static final long CREAK_COOLDOWN = GAME_DAY / 2;
+	public static final double CREAK_MIN_DISTANCE = 9.0;
+	public static final double CREAK_MAX_DISTANCE = 18.0;
+	public static final float CREAK_VOLUME = 1.4F;
+	public static final int CREAK_OPEN_TICKS = 50;
+
+	// --- Far bell (one bell, far away, at night) ---
+
+	public static final int BELL_MIN_DREAD = 3;
+	public static final long BELL_COOLDOWN = 100L * GAME_DAY;
+	public static final int BELL_MIN_DISTANCE = 40;
+	public static final int BELL_MAX_DISTANCE = 55;
+	public static final float BELL_VOLUME = 6.0F;
+	public static final float BELL_PITCH = 0.55F;
+
+	// --- Echo (your own footsteps, a half-second late) ---
+
+	public static final int ECHO_MIN_DREAD = 2;
+	public static final long ECHO_COOLDOWN = GAME_DAY / 2;
+	public static final int ECHO_LENGTH = 10 * SECOND;
+	public static final int ECHO_LAG = 10;
+	public static final float ECHO_VOLUME = 0.35F;
+
+	// --- Flower where you died ---
+
+	public static final int DEATH_FLOWER_MIN_DREAD = 1;
+	public static final long DEATH_FLOWER_COOLDOWN = 0;
+	public static final int DEATH_FLOWER_WEIGHT = 30;
+	public static final double DEATH_FLOWER_MIN_DISTANCE = 20.0;
+
+	// --- Signs that quote you ---
+
+	public static final int SIGN_MIN_DREAD = 3;
+	public static final long SIGN_COOLDOWN = 2L * GAME_DAY;
+	public static final double SIGN_MIN_PLAYER_DISTANCE = 24.0;
+	public static final int SIGN_MIN_RADIUS = 3;
+	public static final int SIGN_MAX_RADIUS = 7;
+	public static final int CHAT_MEMORY = 12;
+	public static final int CHAT_MAX_LENGTH = 60;
+
+	// --- A lantern in the trees (gone when you look away and come closer) ---
+
+	public static final int LIGHT_MIN_DREAD = 3;
+	public static final long LIGHT_COOLDOWN = 2L * GAME_DAY;
+	public static final int LIGHT_MIN_DISTANCE = 30;
+	public static final int LIGHT_MAX_DISTANCE = 42;
+	/** It disappears (when unseen) once you get this close. */
+	public static final double LIGHT_VANISH_DISTANCE = 14.0;
+	public static final long LIGHT_LIFETIME = 4L * MINUTE;
+	/** If you walk right up to it, it is left alone; the record is dropped after this long. */
+	public static final long LIGHT_FORGET_AFTER = 10L * MINUTE;
+
+	// --- Things turned or relit in your base ---
+
+	public static final int TAMPER_MIN_DREAD = 2;
+	public static final long TAMPER_COOLDOWN = GAME_DAY;
+	public static final double TAMPER_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- A map of your base with a red X on your bed ---
+
+	public static final int MAP_MIN_DREAD = 4;
+	public static final long MAP_COOLDOWN = 4L * GAME_DAY;
+	public static final double MAP_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- A row of crops harvested and replanted ---
+
+	public static final int CROPS_MIN_DREAD = 2;
+	public static final long CROPS_COOLDOWN = 2L * GAME_DAY;
+	public static final int CROPS_RADIUS = 16;
+	public static final int CROPS_MIN_ROW = 3;
+	public static final double CROPS_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- Footprints that end at your window ---
+
+	public static final int WINDOW_PRINTS_MIN_DREAD = 3;
+	public static final long WINDOW_PRINTS_COOLDOWN = 2L * GAME_DAY;
+	public static final double WINDOW_PRINTS_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- Chest sorted while you were gone ---
+
+	public static final int SORTED_MIN_DREAD = 2;
+	public static final long SORTED_COOLDOWN = 2L * GAME_DAY;
+	public static final int SORTED_MIN_ITEMS = 6;
+	public static final double SORTED_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- A lit candle by your bed ---
+
+	public static final int CANDLE_MIN_DREAD = 3;
+	public static final long CANDLE_COOLDOWN = 2L * GAME_DAY;
+	public static final double CANDLE_MIN_PLAYER_DISTANCE = 20.0;
+
+	// --- A flower on your doorstep ---
+
+	public static final int DOORSTEP_MIN_DREAD = 2;
+	public static final long DOORSTEP_COOLDOWN = 2L * GAME_DAY;
+	public static final double DOORSTEP_MIN_PLAYER_DISTANCE = 24.0;
+
+	// --- Waking up facing the wall ---
+
+	public static final int BED_TURN_MIN_DREAD = 3;
+	public static final double BED_TURN_CHANCE = 0.3;
+	/** Walls farther than this from where you wake don't count. */
+	public static final int BED_TURN_WALL_RANGE = 4;
 }

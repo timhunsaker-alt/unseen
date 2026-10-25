@@ -30,8 +30,21 @@ public class PlayerRecord {
 	/** How many times it has watched them go to bed. */
 	public int timesSlept;
 
+	/** Where they last died (block pos) and in which dimension, until a flower has been left there. */
+	public Long deathPos;
+	public String deathDimension;
+
+	/** The last things they said in chat, newest last. Used for signs. */
+	public List<String> chat = new ArrayList<>();
+
+	/** Lanterns left out in the dark: "dimension|blockpos" -> world tick it was placed. */
+	public Map<String, Long> strayLights = new HashMap<>();
+
 	/** Set by the debug command: take a photo the next time they sleep. */
 	public boolean forcePhotoNextSleep;
+
+	/** Set by the debug command: turn them to face a wall the next time they wake. */
+	public boolean forceBedTurnNextWake;
 
 	public int dread() {
 		if (this.dreadOverride >= 0) {
