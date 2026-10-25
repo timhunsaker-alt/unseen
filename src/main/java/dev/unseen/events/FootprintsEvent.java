@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -155,12 +154,18 @@ public class FootprintsEvent implements HauntEvent {
 			return false;
 		}
 
-		BlockState base = UnseenBlocks.FOOTPRINT.defaultBlockState().setValue(FootprintBlock.FACING, facing);
 		boolean left = true;
 		for (BlockPos spot : prints) {
-			level.setBlockAndUpdate(spot, base.setValue(FootprintBlock.LEFT, left));
+			press(level, spot, facing, left);
 			left = !left;
 		}
 		return true;
+	}
+
+	/** Presses one boot print into the snow at {@code spot}. */
+	public static void press(ServerLevel level, BlockPos spot, Direction facing, boolean left) {
+		level.setBlockAndUpdate(spot, UnseenBlocks.FOOTPRINT.defaultBlockState()
+				.setValue(FootprintBlock.FACING, facing)
+				.setValue(FootprintBlock.LEFT, left));
 	}
 }

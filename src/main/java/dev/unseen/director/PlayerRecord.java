@@ -27,6 +27,9 @@ public class PlayerRecord {
 	/** Photos that were taken but had no chest to go in yet. Map ids. */
 	public List<Integer> undeliveredPhotos = new ArrayList<>();
 
+	/** How many times it has watched them go to bed. */
+	public int timesSlept;
+
 	/** Set by the debug command: take a photo the next time they sleep. */
 	public boolean forcePhotoNextSleep;
 

@@ -3,9 +3,13 @@ package dev.unseen.director;
 import dev.unseen.Unseen;
 import dev.unseen.events.FootprintsEvent;
 import dev.unseen.events.FootstepsEvent;
+import dev.unseen.events.FootprintCircleEvent;
 import dev.unseen.events.HauntEvent;
+import dev.unseen.events.JournalEvent;
+import dev.unseen.events.KnockEvent;
 import dev.unseen.events.MissingTorchEvent;
 import dev.unseen.events.OpenDoorEvent;
+import dev.unseen.events.TorchTrailEvent;
 import dev.unseen.net.PhotoPayload;
 import dev.unseen.net.SnapRequestPayload;
 import java.util.ArrayList;
@@ -53,7 +57,17 @@ public final class Director {
 			new FootprintsEvent(),
 			new MissingTorchEvent(),
 			new OpenDoorEvent(),
+			new KnockEvent(),
+			new TorchTrailEvent(),
+			new FootprintCircleEvent(),
+			new JournalEvent(),
 			this.footsteps);
+
+	/** Things that happen a few seconds from now (a second knock, the next torch going out). */
+	private record Delayed(long due, Runnable task) {
+	}
+
+	private final List<Delayed> delayed = new ArrayList<>();
 
 	/** Photos we've asked for and are waiting on: player -> request. */
 	private final Map<UUID, PendingPhoto> pendingPhotos = new HashMap<>();
@@ -77,6 +91,7 @@ public final class Director {
 		this.state = new WatcherState(server.getWorldPath(LevelResource.DATA).resolve("unseen_watcher.json"));
 		this.state.load();
 		this.pendingPhotos.clear();
+		this.delayed.clear();
 	}
 
 	public void save() {
@@ -86,6 +101,7 @@ public final class Director {
 	}
 
 	public void stop() {
+		this.delayed.clear();
 		this.save();
 		this.state = null;
 		this.server = null;
@@ -110,6 +126,7 @@ public final class Director {
 
 		this.footsteps.tick(server);
 		this.tickPhotos(now);
+		this.tickDelayed(now);
 
 		if (now % Tuning.SECOND != 0) {
 			return;
@@ -127,6 +144,32 @@ public final class Director {
 			}
 			if (!record.undeliveredPhotos.isEmpty() && now % (10 * Tuning.SECOND) == 0) {
 				this.retryDeliveries(player, record);
+			}
+		}
+	}
+
+	/** Runs {@code task} on the server thread after {@code ticks}. Dropped if the world closes first. */
+	public void later(long ticks, Runnable task) {
+		this.delayed.add(new Delayed(this.now() + ticks, task));
+	}
+
+	private void tickDelayed(long now) {
+		if (this.delayed.isEmpty()) {
+			return;
+		}
+		List<Delayed> due = new ArrayList<>();
+		this.delayed.removeIf(d -> {
+			if (d.due() <= now) {
+				due.add(d);
+				return true;
+			}
+			return false;
+		});
+		for (Delayed d : due) {
+			try {
+				d.task().run();
+			} catch (RuntimeException e) {
+				Unseen.LOGGER.error("Delayed task failed", e);
 			}
 		}
 	}
@@ -207,6 +250,7 @@ public final class Director {
 		// It learns where you sleep.
 		record.homePos = bed.asLong();
 		record.homeDimension = Senses.level(player).dimension().identifier().toString();
+		record.timesSlept++;
 
 		long now = this.state.worldTicks();
 		boolean due = record.dread() >= Tuning.PHOTO_MIN_DREAD
