@@ -53,8 +53,22 @@ You need **JDK 25** (Temurin is fine) and an IDE (IntelliJ IDEA 2025.3+ works be
 ./gradlew build         # makes the mod jar in build/libs/
 ```
 
-To play it normally: install Fabric Loader for 26.3, put **Fabric API** and
-`build/libs/unseen-0.1.0.jar` in your `mods` folder.
+## Install (macOS and Linux, same jar)
+
+The jar is plain Java, so one file works everywhere: `dist/unseen-0.1.0.jar`.
+
+1. Install **Java 25** (Temurin is fine).
+2. Install **Fabric Loader** for Minecraft 26.3 with the installer from https://fabricmc.net/use/installer
+   (Loader 0.20.1 or newer). Run it, pick 26.3, and let it create the launcher profile.
+3. Download **Fabric API for 26.3** (Modrinth: https://modrinth.com/mod/fabric-api).
+4. Put `unseen-0.1.0.jar` and the Fabric API jar in your `mods` folder:
+   - macOS: `~/Library/Application Support/minecraft/mods`
+   - Linux: `~/.minecraft/mods`
+5. Launch the Fabric profile.
+
+Everyone who joins a world needs the mod (the footprint is a new block).
+
+To rebuild the jar after changes: `./gradlew build`, then copy `build/libs/unseen-0.1.0.jar` (not the `-sources` one) into `dist/`.
 
 ## Testing without waiting days
 
