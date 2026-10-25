@@ -320,4 +320,24 @@ public final class Tuning {
 	public static final boolean PLAYER_CAN_LOOK_UP_LOG = true;
 	public static final int LOG_DEFAULT_LINES = 10;
 	public static final int LOG_MAX_LINES = 50;
+
+	// ================================================================================
+	// The suspicious steak
+	// ================================================================================
+
+	public static final int STEAK_MIN_DREAD = 4;
+	public static final long STEAK_COOLDOWN = 2L * GAME_DAY;
+	public static final int STEAK_WEIGHT = 10;
+	/** The furnace has to be this far from you, so you see it from a little way off: too near and it's not seen starting. */
+	public static final double STEAK_MIN_DISTANCE = 2.5;
+	public static final double STEAK_MAX_DISTANCE = 10.0;
+
+	/** Eating it: how likely each outcome is, relative to the others. */
+	public static final int STEAK_WEIGHT_NORMAL = 40;
+	public static final int STEAK_WEIGHT_NAUSEA = 30;
+	public static final int STEAK_WEIGHT_FULL_HEARTS = 30;
+	public static final int STEAK_NAUSEA_TICKS = 15 * SECOND;
+	/** The full-hearts outcome leaves you this hungry (a number from the min to the max, 20 is full). */
+	public static final int STEAK_HUNGER_MIN = 1;
+	public static final int STEAK_HUNGER_MAX = 2;
 }

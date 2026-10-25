@@ -1,3 +1,5 @@
 {
-  "block.unseen.footprint": "Footprint"
+  "block.unseen.footprint": "Footprint",
+  "item.unseen.suspicious_steak": "Suspicious Steak",
+  "item.unseen.raw_suspicious_steak": "Raw Beef"
 }

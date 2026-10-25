@@ -34,7 +34,22 @@ player, slowly gets bolder, and waits for moments when nobody is looking.
 | `witness` | Dread 2+, animals nearby | Every animal stops and stares at the same empty spot behind you. A pet may growl or hiss. |
 | `bell` | Dread 3+, at night, outdoors | One bell, far away. Roughly once per world. |
 | `bedturn` (not random; hooks into waking) | Dread 3+ | You wake up facing the wall, not the room. Use `/unseen trigger bedturn` then sleep. |
+| `steak` | Dread 4+, an empty furnace or smoker in plain view, 2.5 to 10 blocks away | A raw steak and a plank of fuel appear in it. It lights and cooks while you watch. What comes out is a **Suspicious Steak** (see below). |
 | `heartbeat` | Dread 3+ | Your own heartbeat, soft and low, only you can hear it. It speeds up, then stops. |
+
+### The Suspicious Steak
+
+A grey steak with green spots. It can't be crafted and isn't in the creative menu; the only way to get one is the `steak` scare
+(or `/give @s unseen:suspicious_steak` for testing). The raw item that cooks into it is named and looks exactly like raw beef,
+and any furnace or smoker will cook it. Eaten, it is a normal steak first (8 hunger), and then one of these happens:
+
+| Outcome | Chance | What you get |
+|---|---|---|
+| Just a steak | 40% | Nothing more. |
+| Nausea | 30% | A steak, then 15 seconds of feeling sick. |
+| Full hearts, starving | 30% | Health goes to full, but hunger drops to 1 or 2. |
+
+Nothing it does can kill you. The chances, the nausea length and the hunger range are in `Tuning.java`.
 
 ### After the dragon (dread 6)
 
@@ -122,7 +137,7 @@ To rebuild after changes: `./gradlew build`, then copy `build/libs/unseen-0.1.0.
 
 `./gradlew runClientGameTest` starts a real world (a game window opens for about a minute), builds a scene, runs a scare and checks
 the result. The first test builds a snowy field with a leafy canopy and snow lying on top of the leaves, runs the footprints scare, and
-checks every print is on the ground and none are in the trees. It saves a screenshot to `build/run/clientGameTest/screenshots/`.
+checks every print is on the ground and none are in the trees. A second test makes a furnace fill itself, checks it lights and cooks into a Suspicious Steak, and checks each eating outcome and the log entry. They save screenshots to `build/run/clientGameTest/screenshots/`.
 The tests are in `src/gametest/`; add a scene there when a scare misbehaves, so it can't come back.
 
 ## Testing without waiting days

@@ -23,6 +23,7 @@ import dev.unseen.events.OpenDoorEvent;
 import dev.unseen.events.ReturnEvent;
 import dev.unseen.events.SignEvent;
 import dev.unseen.events.SortedChestEvent;
+import dev.unseen.events.SuspiciousSteakEvent;
 import dev.unseen.events.StrayLightEvent;
 import dev.unseen.events.TamperEvent;
 import dev.unseen.events.TorchTrailEvent;
@@ -100,6 +101,7 @@ public final class Director {
 			new LogbookEvent(),
 			new WanderingCandlesEvent(),
 			new ReturnEvent(),
+			new SuspiciousSteakEvent(),
 			this.footsteps));
 
 	/** Things that happen a few seconds from now (a second knock, the next torch going out). */

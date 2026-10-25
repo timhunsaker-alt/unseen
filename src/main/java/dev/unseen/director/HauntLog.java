@@ -60,6 +60,7 @@ public final class HauntLog {
 			Map.entry("return", "Your house was arranged while you were away."),
 			Map.entry("wingbeats", "Wingbeats passed far overhead."),
 			Map.entry("voice", "Your own voice spoke from behind you."),
+			Map.entry("steak", "A steak appeared in a furnace near you and started to cook."),
 			Map.entry("photo", "A photo of you sleeping was left in a chest."),
 			Map.entry("bedturn", "You woke up facing the wall."),
 			Map.entry("dread", "It grew bolder."),

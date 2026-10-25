@@ -35,6 +35,7 @@ public class Unseen implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		UnseenBlocks.register();
+		UnseenItems.register();
 
 		// Networking: server asks the client for a photo, client sends the pixels back.
 		PayloadTypeRegistry.clientboundPlay().register(SnapRequestPayload.TYPE, SnapRequestPayload.CODEC);
