@@ -51,11 +51,9 @@ public final class ActivityLog {
 			}
 		}
 
-		long clock = level.getOverworldClockTime();
 		Entry entry = new Entry();
-		entry.day = clock / 24000 + 1;
-		long ticks = clock % 24000;
-		entry.minute = (int) (((ticks / 1000 + 6) % 24) * 60 + (ticks % 1000) * 60 / 1000);
+		entry.day = HauntLog.dayOf(level);
+		entry.minute = HauntLog.minuteOf(level);
 		entry.dimension = dimension;
 		entry.x = pos.getX();
 		entry.y = pos.getY();

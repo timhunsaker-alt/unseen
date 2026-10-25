@@ -33,6 +33,11 @@ public class VoiceReplayEvent implements HauntEvent {
 	}
 
 	@Override
+	public String description() {
+		return "Your own voice spoke from somewhere behind you.";
+	}
+
+	@Override
 	public int minDread() {
 		return 3;
 	}

@@ -309,4 +309,15 @@ public final class Tuning {
 	public static final int RETURN_MIN_DREAD = 6;
 	public static final double RETURN_MIN_PLAYER_DISTANCE = 24.0;
 	public static final int RETURN_WEIGHT = 40;
+
+	// ================================================================================
+	// The record of what it has done
+	// ================================================================================
+
+	/** How many actions are kept per player, oldest dropped first. */
+	public static final int LOG_MAX_ENTRIES = 300;
+	/** Lets any player look up their own log with /unseenlog. Set to false and only operators can read it. */
+	public static final boolean PLAYER_CAN_LOOK_UP_LOG = true;
+	public static final int LOG_DEFAULT_LINES = 10;
+	public static final int LOG_MAX_LINES = 50;
 }

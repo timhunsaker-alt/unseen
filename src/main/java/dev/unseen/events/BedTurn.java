@@ -1,5 +1,8 @@
 package dev.unseen.events;
 
+import dev.unseen.director.Director;
+import dev.unseen.director.HauntLog;
+import dev.unseen.director.PlayerRecord;
 import dev.unseen.director.Senses;
 import dev.unseen.director.Tuning;
 import net.minecraft.core.BlockPos;
@@ -41,5 +44,9 @@ public final class BedTurn {
 			return; // open room: nothing to face
 		}
 		player.connection.teleport(player.getX(), player.getY(), player.getZ(), nearest.toYRot(), 5.0F);
+		PlayerRecord record = Director.get().record(player);
+		if (record != null) {
+			HauntLog.add(player, record, "bedturn");
+		}
 	}
 }

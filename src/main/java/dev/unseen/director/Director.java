@@ -189,6 +189,17 @@ public final class Director {
 			record.quiet = record.dragonSlain && now < record.dragonQuietEndsAt;
 			record.aftermath = record.dragonSlain && !record.quiet;
 
+			// Write down when the quiet ends and when it grows bolder, so the log tells the whole story.
+			if (record.wasQuiet && !record.quiet && record.dragonSlain) {
+				HauntLog.add(player, record, "quiet", "The quiet ended. It is bolder now.");
+			}
+			record.wasQuiet = record.quiet;
+			int dreadNow = record.dread();
+			if (record.lastDread >= 0 && dreadNow > record.lastDread) {
+				HauntLog.add(player, record, "dread", "It grew bolder (level " + dreadNow + ").");
+			}
+			record.lastDread = dreadNow;
+
 			// It writes down roughly where you are and what you're doing, about once a minute.
 			if ((now / Tuning.SECOND + (player.getUUID().hashCode() & 0xFF)) % Tuning.ACTIVITY_SAMPLE_SECONDS == 0) {
 				ActivityLog.sample(player, record);
@@ -298,7 +309,8 @@ public final class Director {
 		if (happened) {
 			record.lastEventAt = now;
 			record.lastRun.put(event.id(), now);
-			Unseen.LOGGER.debug("{} -> {}", event.id(), player.getName().getString());
+			HauntLog.add(player, record, event.id(), HauntLog.describe(event));
+			Unseen.LOGGER.info("{} <- {}", player.getName().getString(), event.id());
 		}
 		return happened;
 	}
@@ -352,6 +364,7 @@ public final class Director {
 			if (!record.dragonSlain) {
 				record.dragonSlain = true;
 				record.dragonQuietEndsAt = now + Tuning.POST_DRAGON_QUIET;
+				HauntLog.add(player, record, "quiet", "The dragon fell. Everything went quiet.");
 			}
 		}
 		this.save();
@@ -470,6 +483,7 @@ public final class Director {
 		if (pending.shadow() > 0) {
 			record.shadowStep = pending.shadow(); // the next photo has it one step closer
 		}
+		HauntLog.add(player, record, "photo");
 
 		if (!this.deliver(level, pending.bed(), mapId)) {
 			// No chest near the bed. It'll wait until there is one.

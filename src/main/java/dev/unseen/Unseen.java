@@ -71,7 +71,10 @@ public class Unseen implements ModInitializer {
 				Director.get().onChat(sender, message.signedContent()));
 
 		CommandRegistrationCallback.EVENT.register(
-				(dispatcher, buildContext, selection) -> UnseenCommand.register(dispatcher));
+				(dispatcher, buildContext, selection) -> {
+					UnseenCommand.register(dispatcher);
+					UnseenLogCommand.register(dispatcher);
+				});
 
 		LOGGER.info("...");
 	}

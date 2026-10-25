@@ -23,6 +23,14 @@ public interface HauntEvent {
 		return 10;
 	}
 
+	/**
+	 * A plain sentence for the log of what it has done, in second person ("Someone knocked on your door.").
+	 * Return null to use the built-in text for this event's id, or just the id if there isn't one.
+	 */
+	default String description() {
+		return null;
+	}
+
 	/** Same as weight(), but an event can be picked more often at a higher dread level. */
 	default int weight(int dread) {
 		return weight();

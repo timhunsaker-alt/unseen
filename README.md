@@ -61,8 +61,34 @@ happens at all, so new worlds feel normal. Higher dread means more frequent even
 - Nothing happens anywhere the player is looking (a wide 150° cone, walls ignored). The one exception is after the dragon, when wandering candles move in plain view.
 - It only acts when you're alone (nobody else within 32 blocks).
 - It learns where "home" is by watching where you sleep.
-- It never tells you anything. No chat messages, no advancements.
+- It never tells you anything on its own. No chat messages, no advancements. (`/unseenlog` only answers when you ask.)
 - It never screams. No loud, shrill or sudden sounds: only quiet things, like footsteps, a knock, a far bell, wingbeats, and a soft heartbeat.
+
+## Looking up what it has done
+
+It never tells you anything on its own. But it keeps a written record of every action, per player, in its memory of
+them (saved with the world), and anyone can ask to see their own:
+
+| Command | What it shows |
+|---|---|
+| `/unseenlog` | The last 10 things that happened to you, with the in-game day and time and where you were. |
+| `/unseenlog 30` | The last 30 (up to 50). |
+| `/unseenlog clear` | Forgets what is written about you. New things are still written down. |
+| `/unseenlog player <name> [number]` | (operators) Another player's log. |
+
+Example:
+
+```
+What has happened (3 of 41):
+Day 3, 23:05  Footprints were pressed into the snow.  (88 70 14)
+Day 4, 06:00  You heard your own heartbeat.  (12 80 300, the nether)
+Day 4, 13:30  The dragon fell. Everything went quiet.  (0 64 0, the end)
+```
+
+It records scares, sleeping photos, waking up facing the wall, the dragon and the quiet, and each time it grows bolder.
+Up to 300 entries per player are kept, oldest dropped first. It's also written to the server log (`<player> <- <event>`) for
+whoever runs the server. If you'd rather players couldn't read their own, set `PLAYER_CAN_LOOK_UP_LOG` to `false` in
+`Tuning.java`; then only operators can. Testing with `/unseen trigger` adds entries too; `/unseenlog clear` wipes them.
 
 ## Build and run
 

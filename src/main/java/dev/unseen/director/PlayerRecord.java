@@ -52,9 +52,15 @@ public class PlayerRecord {
 	/** Candles wandering in the house: "dimension|blockpos" -> world tick placed. */
 	public Map<String, Long> wanderCandles = new HashMap<>();
 
+	/** What it has done to this player, oldest first. Shown only when they ask (/unseenlog). */
+	public List<HauntLog.Entry> history = new ArrayList<>();
+	/** The last dread level it noticed, so a rise can be written down. -1 until first seen. */
+	public int lastDread = -1;
+
 	/** Worked out every second by the director from the fields above; not saved. */
 	public transient boolean quiet;
 	public transient boolean aftermath;
+	public transient boolean wasQuiet;
 
 	/** Set by the debug command: take a photo the next time they sleep. */
 	public boolean forcePhotoNextSleep;
