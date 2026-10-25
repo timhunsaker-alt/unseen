@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -72,31 +74,52 @@ public final class Senses {
 	}
 
 	/**
-	 * Finds where a footprint could go in this column, searching around height y.
+	 * Finds where a footprint could go in this column: snow lying on real ground. {@code y} is the height the
+	 * trail is already at; a spot much higher or lower than that (a cliff, a hilltop) is skipped.
 	 * Returns the position to put the print at, or null if this spot isn't snowy ground.
+	 *
+	 * The ground is found by ignoring leaves. Tree canopies hold snow of their own, so looking for "the first
+	 * snow from above" puts footprints in the treetops.
 	 */
 	public static BlockPos snowSurface(ServerLevel level, int x, int y, int z) {
-		for (int dy = 6; dy >= -10; dy--) {
-			BlockPos pos = new BlockPos(x, y + dy, z);
-			if (!level.hasChunkAt(pos)) {
-				return null;
-			}
-			BlockState state = level.getBlockState(pos);
-			if (state.isAir()) {
-				continue;
-			}
-			// A thin snow layer: press the print into it.
-			if (state.is(Blocks.SNOW) && state.getValue(SnowLayerBlock.LAYERS) <= 2) {
-				return pos;
-			}
-			// A full snow block with air above: press the print on top.
-			if (state.is(Blocks.SNOW_BLOCK) && level.getBlockState(pos.above()).isAir()) {
-				return pos.above();
-			}
-			// Hit something that isn't snow (grass, leaves, water...): no print here.
-			return null;
+		if (!level.hasChunkAt(new BlockPos(x, y, z))) {
+			return null; // never load or generate a chunk just to leave a print
 		}
-		return null;
+		// The first free block above the ground, ignoring leaves.
+		BlockPos top = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
+		BlockPos found = snowAt(level, top);
+		return found != null && Math.abs(found.getY() - y) <= 10 ? found : null;
+	}
+
+	private static BlockPos snowAt(ServerLevel level, BlockPos top) {
+		BlockState here = level.getBlockState(top);
+		BlockState below = level.getBlockState(top.below());
+
+		// One thin layer of snow (it has no collision, so the ground is just under it).
+		if (here.is(Blocks.SNOW) && here.getValue(SnowLayerBlock.LAYERS) <= 2 && isGround(below)) {
+			return top;
+		}
+		// Two layers do have collision, so the snow is the top block and the free space is above it.
+		if (below.is(Blocks.SNOW) && below.getValue(SnowLayerBlock.LAYERS) <= 2
+				&& isGround(level.getBlockState(top.below(2)))) {
+			return top.below();
+		}
+		// A full snow block with air above it.
+		if (here.isAir() && below.is(Blocks.SNOW_BLOCK)) {
+			return top;
+		}
+		return null; // grass, bare dirt, water, a treetop, a roof...: no print here
+	}
+
+	/**
+	 * Earth, sand, stone and snow count as ground. Leaves, logs, planks and the like do not.
+	 * Note the dirt tag does not include grass blocks (or podzol, mycelium, mud, moss), which is most of what snow lies on.
+	 */
+	public static boolean isGround(BlockState state) {
+		return state.is(BlockTags.DIRT) || state.is(BlockTags.GRASS_BLOCKS) || state.is(Blocks.PODZOL)
+				|| state.is(Blocks.MYCELIUM) || state.is(Blocks.MUD) || state.is(Blocks.MOSS_BLOCK)
+				|| state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD)
+				|| state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.GRAVEL) || state.is(Blocks.CLAY);
 	}
 
 	/** Every block around the bed (the house) whose state passes {@code test}. */

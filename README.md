@@ -118,6 +118,13 @@ Everyone who joins a world needs the mod (the footprint is a new block).
 
 To rebuild after changes: `./gradlew build`, then copy `build/libs/unseen-0.1.0.jar` and `unseen-voice/build/libs/unseen-voice-0.1.0.jar` (not the `-sources` ones) into `dist/`.
 
+## Automated tests
+
+`./gradlew runClientGameTest` starts a real world (a game window opens for about a minute), builds a scene, runs a scare and checks
+the result. The first test builds a snowy field with a leafy canopy and snow lying on top of the leaves, runs the footprints scare, and
+checks every print is on the ground and none are in the trees. It saves a screenshot to `build/run/clientGameTest/screenshots/`.
+The tests are in `src/gametest/`; add a scene there when a scare misbehaves, so it can't come back.
+
 ## Testing without waiting days
 
 Turn cheats on, then:

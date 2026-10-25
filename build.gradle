@@ -21,6 +21,16 @@ loom {
 	}
 }
 
+// Automated in-game tests: ./gradlew runClientGameTest starts a real world, builds a scene, runs a scare and checks the result.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "unseen-gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"

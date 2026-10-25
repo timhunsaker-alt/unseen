@@ -7,7 +7,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -52,7 +51,7 @@ public class DeathFlowerEvent implements HauntEvent {
 				for (int dz = -2; dz <= 2; dz++) {
 					BlockPos spot = death.offset(dx, dy, dz);
 					if (!level.hasChunkAt(spot) || !level.getBlockState(spot).isAir()
-							|| !level.getBlockState(spot.below()).is(BlockTags.DIRT) || !flower.canSurvive(level, spot)
+							|| !Senses.isGround(level.getBlockState(spot.below())) || !flower.canSurvive(level, spot)
 							|| Senses.canSee(player, spot)) {
 						continue;
 					}

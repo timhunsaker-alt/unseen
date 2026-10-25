@@ -1,0 +1,16 @@
+{
+	"schemaVersion": 1,
+	"id": "unseen-gametest",
+	"version": "1.0.0",
+	"name": "Unseen game tests",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"dev.unseen.gametest.UnseenClientGameTest"
+		]
+	},
+	"depends": {
+		"unseen": "*",
+		"fabric-api": "*"
+	}
+}
