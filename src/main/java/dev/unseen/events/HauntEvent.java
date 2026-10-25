@@ -23,6 +23,11 @@ public interface HauntEvent {
 		return 10;
 	}
 
+	/** Same as weight(), but an event can be picked more often at a higher dread level. */
+	default int weight(int dread) {
+		return weight();
+	}
+
 	/**
 	 * Try to do the thing. Return true only if something actually happened.
 	 * Returning false is fine (wrong conditions); the director will try again later.

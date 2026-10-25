@@ -103,6 +103,11 @@ Restart the Minecraft server. Players who have opted in and have enough clips ge
 | `minDistance` / `maxDistance` | How far behind the player the voice comes from. |
 | `phraseWeight` | How much more often generated phrases are picked than recorded clips. |
 
+## Never loud
+
+Like the rest of Unseen, nothing here screams. Voices play at normal speaking volume (`playbackVolume`, 0.8 by default, and a little slower and lower),
+only the target player hears them, and they come from behind, not at them.
+
 ## Privacy
 
 - Recording only happens for players who typed `/unseenvoice optin`, and `/unseenvoice optout` deletes everything of theirs from the server.

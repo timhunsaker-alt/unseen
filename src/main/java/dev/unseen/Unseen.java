@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,8 @@ public class Unseen implements ModInitializer {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				Director.get().onDeath(player);
+			} else if (entity instanceof EnderDragon) {
+				Director.get().onDragonDeath(entity);
 			}
 		});
 		ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) ->

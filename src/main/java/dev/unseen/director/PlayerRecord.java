@@ -40,6 +40,22 @@ public class PlayerRecord {
 	/** Lanterns left out in the dark: "dimension|blockpos" -> world tick it was placed. */
 	public Map<String, Long> strayLights = new HashMap<>();
 
+	/** The dragon: whether this player was there when it fell, and when the quiet afterwards ends (world tick). */
+	public boolean dragonSlain;
+	public long dragonQuietEndsAt;
+	/** The "return" scare (home rearranged while they were away) has happened. */
+	public boolean returnDone;
+	/** How many shadow-in-the-photo steps have been used. */
+	public int shadowStep;
+	/** What it has noted about where they were and what they were doing, oldest first. */
+	public List<ActivityLog.Entry> activity = new ArrayList<>();
+	/** Candles wandering in the house: "dimension|blockpos" -> world tick placed. */
+	public Map<String, Long> wanderCandles = new HashMap<>();
+
+	/** Worked out every second by the director from the fields above; not saved. */
+	public transient boolean quiet;
+	public transient boolean aftermath;
+
 	/** Set by the debug command: take a photo the next time they sleep. */
 	public boolean forcePhotoNextSleep;
 
@@ -50,7 +66,10 @@ public class PlayerRecord {
 		if (this.dreadOverride >= 0) {
 			return Math.min(this.dreadOverride, Tuning.MAX_DREAD);
 		}
-		return (int) Math.min(Tuning.MAX_DREAD, this.activeTicks / Tuning.TICKS_PER_DREAD);
+		if (this.aftermath) {
+			return Tuning.MAX_DREAD; // after the dragon
+		}
+		return (int) Math.min(Tuning.TIME_DREAD_CAP, this.activeTicks / Tuning.TICKS_PER_DREAD);
 	}
 
 	public long lastRun(String eventId) {

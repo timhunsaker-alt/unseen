@@ -13,17 +13,22 @@ import dev.unseen.events.EchoEvent;
 import dev.unseen.events.FarBellEvent;
 import dev.unseen.events.FootprintCircleEvent;
 import dev.unseen.events.HauntEvent;
+import dev.unseen.events.HeartbeatEvent;
 import dev.unseen.events.JournalEvent;
 import dev.unseen.events.KnockEvent;
+import dev.unseen.events.LogbookEvent;
 import dev.unseen.events.MapEvent;
 import dev.unseen.events.MissingTorchEvent;
 import dev.unseen.events.OpenDoorEvent;
+import dev.unseen.events.ReturnEvent;
 import dev.unseen.events.SignEvent;
 import dev.unseen.events.SortedChestEvent;
 import dev.unseen.events.StrayLightEvent;
 import dev.unseen.events.TamperEvent;
 import dev.unseen.events.TorchTrailEvent;
+import dev.unseen.events.WanderingCandlesEvent;
 import dev.unseen.events.WindowPrintsEvent;
+import dev.unseen.events.WingbeatsEvent;
 import dev.unseen.events.WitnessEvent;
 import dev.unseen.net.PhotoPayload;
 import dev.unseen.net.SnapRequestPayload;
@@ -90,6 +95,11 @@ public final class Director {
 			new SortedChestEvent(),
 			new CandleEvent(),
 			new DoorstepEvent(),
+			new HeartbeatEvent(),
+			new WingbeatsEvent(),
+			new LogbookEvent(),
+			new WanderingCandlesEvent(),
+			new ReturnEvent(),
 			this.footsteps));
 
 	/** Things that happen a few seconds from now (a second knock, the next torch going out). */
@@ -101,9 +111,9 @@ public final class Director {
 	/** Photos we've asked for and are waiting on: player -> request. */
 	private final Map<UUID, PendingPhoto> pendingPhotos = new HashMap<>();
 
-	private record PendingPhoto(long nonce, BlockPos bed, long sendAt, long expiresAt, boolean sent) {
+	private record PendingPhoto(long nonce, BlockPos bed, long sendAt, long expiresAt, boolean sent, int detail, int shadow) {
 		PendingPhoto markSent() {
-			return new PendingPhoto(this.nonce, this.bed, this.sendAt, this.expiresAt, true);
+			return new PendingPhoto(this.nonce, this.bed, this.sendAt, this.expiresAt, true, this.detail, this.shadow);
 		}
 	}
 
@@ -175,6 +185,15 @@ public final class Director {
 			PlayerRecord record = this.state.player(player.getUUID());
 			record.activeTicks += Tuning.SECOND;
 
+			// After the dragon: a day of silence, then dread 6.
+			record.quiet = record.dragonSlain && now < record.dragonQuietEndsAt;
+			record.aftermath = record.dragonSlain && !record.quiet;
+
+			// It writes down roughly where you are and what you're doing, about once a minute.
+			if ((now / Tuning.SECOND + (player.getUUID().hashCode() & 0xFF)) % Tuning.ACTIVITY_SAMPLE_SECONDS == 0) {
+				ActivityLog.sample(player, record);
+			}
+
 			// Spread players' rolls out so they don't all happen on the same tick.
 			if ((now / Tuning.SECOND + (player.getUUID().hashCode() & 0xFF)) % (Tuning.CHECK_INTERVAL / Tuning.SECOND) == 0) {
 				this.consider(player, record, now);
@@ -224,6 +243,9 @@ public final class Director {
 		if (dread <= 0 || player.isSleeping() || !Senses.isAlone(player)) {
 			return;
 		}
+		if (record.quiet && record.dreadOverride < 0) {
+			return; // the quiet after the dragon: nothing at all
+		}
 		if (now - record.lastEventAt < Tuning.QUIET_TIME[dread]) {
 			return;
 		}
@@ -233,13 +255,15 @@ public final class Director {
 
 		List<HauntEvent> candidates = new ArrayList<>();
 		for (HauntEvent event : this.events) {
-			if (dread >= event.minDread() && now - record.lastRun(event.id()) >= event.cooldown()) {
+			// At dread 6 everything comes back sooner.
+			long cooldown = dread >= Tuning.MAX_DREAD ? (long) (event.cooldown() * Tuning.DREAD6_COOLDOWN_FACTOR) : event.cooldown();
+			if (dread >= event.minDread() && now - record.lastRun(event.id()) >= cooldown) {
 				candidates.add(event);
 			}
 		}
 		// Try events in a weighted-random order until one of them actually works.
 		while (!candidates.isEmpty()) {
-			HauntEvent event = this.pickWeighted(candidates);
+			HauntEvent event = this.pickWeighted(candidates, dread);
 			candidates.remove(event);
 			if (this.runEvent(player, record, event, now)) {
 				return;
@@ -247,14 +271,14 @@ public final class Director {
 		}
 	}
 
-	private HauntEvent pickWeighted(List<HauntEvent> candidates) {
+	private HauntEvent pickWeighted(List<HauntEvent> candidates, int dread) {
 		int total = 0;
 		for (HauntEvent event : candidates) {
-			total += event.weight();
+			total += event.weight(dread);
 		}
 		int roll = this.random.nextInt(Math.max(1, total));
 		for (HauntEvent event : candidates) {
-			roll -= event.weight();
+			roll -= event.weight(dread);
 			if (roll < 0) {
 				return event;
 			}
@@ -313,6 +337,49 @@ public final class Director {
 		}
 	}
 
+	/** The dragon fell. Everyone who was there starts the quiet; dread 6 follows when it ends. */
+	public void onDragonDeath(net.minecraft.world.entity.Entity dragon) {
+		if (this.state == null || !(dragon.level() instanceof ServerLevel level)) {
+			return;
+		}
+		long now = this.state.worldTicks();
+		double radius = Tuning.DRAGON_CREDIT_RADIUS;
+		for (ServerPlayer player : level.players()) {
+			if (player.isSpectator() || !player.isAlive() || player.distanceToSqr(dragon) > radius * radius) {
+				continue;
+			}
+			PlayerRecord record = this.state.player(player.getUUID());
+			if (!record.dragonSlain) {
+				record.dragonSlain = true;
+				record.dragonQuietEndsAt = now + Tuning.POST_DRAGON_QUIET;
+			}
+		}
+		this.save();
+	}
+
+	/** Debug: pretend the dragon fell ("slain"), end the quiet at once ("skipquiet"), or undo it all ("clear"). */
+	public void debugDragon(PlayerRecord record, String mode) {
+		long now = this.now();
+		switch (mode) {
+			case "slain" -> {
+				record.dragonSlain = true;
+				record.dragonQuietEndsAt = now + Tuning.POST_DRAGON_QUIET;
+			}
+			case "skipquiet" -> {
+				record.dragonSlain = true;
+				record.dragonQuietEndsAt = now;
+			}
+			default -> {
+				record.dragonSlain = false;
+				record.dragonQuietEndsAt = 0;
+				record.returnDone = false;
+				record.shadowStep = 0;
+			}
+		}
+		record.quiet = record.dragonSlain && now < record.dragonQuietEndsAt;
+		record.aftermath = record.dragonSlain && !record.quiet;
+	}
+
 	/** After they get out of bed: sometimes they're facing the wall. */
 	public void onWake(ServerPlayer player) {
 		if (this.state == null) {
@@ -343,15 +410,23 @@ public final class Director {
 		record.timesSlept++;
 
 		long now = this.state.worldTicks();
-		boolean due = record.dread() >= Tuning.PHOTO_MIN_DREAD
-				&& now - record.lastRun("photo") >= Tuning.PHOTO_COOLDOWN
-				&& this.random.nextDouble() < Tuning.PHOTO_CHANCE
+		int dread = record.dread();
+		boolean aftermath = dread >= Tuning.MAX_DREAD;
+		long cooldown = aftermath ? Tuning.DREAD6_PHOTO_COOLDOWN : Tuning.PHOTO_COOLDOWN;
+		double chance = aftermath ? Tuning.DREAD6_PHOTO_CHANCE : Tuning.PHOTO_CHANCE;
+		boolean due = !(record.quiet && record.dreadOverride < 0)
+				&& dread >= Tuning.PHOTO_MIN_DREAD
+				&& now - record.lastRun("photo") >= cooldown
+				&& this.random.nextDouble() < chance
 				&& Senses.isAlone(player);
 		if (due || record.forcePhotoNextSleep) {
 			record.forcePhotoNextSleep = false;
 			long nonce = this.random.nextLong();
+			// After the dragon the photo is sharper, and there's a shadow in it that gets closer each time.
+			int detail = aftermath ? 1 : 0;
+			int shadow = aftermath ? Math.min(record.shadowStep + 1, Tuning.PHOTO_SHADOW_STEPS) : 0;
 			this.pendingPhotos.put(player.getUUID(),
-					new PendingPhoto(nonce, bed, now + Tuning.PHOTO_DELAY, now + Tuning.PHOTO_TIMEOUT, false));
+					new PendingPhoto(nonce, bed, now + Tuning.PHOTO_DELAY, now + Tuning.PHOTO_TIMEOUT, false, detail, shadow));
 		}
 	}
 
@@ -370,7 +445,7 @@ public final class Director {
 					it.remove(); // got up too fast, left, or doesn't have the mod on their client
 					continue;
 				}
-				ServerPlayNetworking.send(player, new SnapRequestPayload(pending.nonce()));
+				ServerPlayNetworking.send(player, new SnapRequestPayload(pending.nonce(), pending.detail(), pending.shadow()));
 				entry.setValue(pending.markSent());
 			}
 		}
@@ -392,6 +467,9 @@ public final class Director {
 
 		PlayerRecord record = this.state.player(player.getUUID());
 		record.lastRun.put("photo", this.state.worldTicks());
+		if (pending.shadow() > 0) {
+			record.shadowStep = pending.shadow(); // the next photo has it one step closer
+		}
 
 		if (!this.deliver(level, pending.bed(), mapId)) {
 			// No chest near the bed. It'll wait until there is one.

@@ -24,6 +24,8 @@ public final class PhotoCamera {
 
 	private static Phase phase = Phase.IDLE;
 	private static long nonce;
+	private static int detail;
+	private static int shadow;
 
 	private static CameraType savedCamera;
 	private static boolean savedHideGui;
@@ -33,9 +35,11 @@ public final class PhotoCamera {
 	private PhotoCamera() {
 	}
 
-	public static void request(long requestNonce) {
+	public static void request(long requestNonce, int requestDetail, int requestShadow) {
 		if (phase == Phase.IDLE) {
 			nonce = requestNonce;
+			detail = requestDetail;
+			shadow = requestShadow;
 			phase = Phase.POSING;
 		}
 	}
@@ -75,8 +79,10 @@ public final class PhotoCamera {
 			}
 			case SHOOTING -> {
 				long shotNonce = nonce;
+				int shotDetail = detail;
+				int shotShadow = shadow;
 				try {
-					Screenshot.takeScreenshot(client.gameRenderer.mainRenderTarget(), image -> develop(client, image, shotNonce));
+					Screenshot.takeScreenshot(client.gameRenderer.mainRenderTarget(), image -> develop(client, image, shotNonce, shotDetail, shotShadow));
 				} catch (RuntimeException e) {
 					Unseen.LOGGER.warn("Photo failed", e);
 				}
@@ -95,10 +101,10 @@ public final class PhotoCamera {
 		}
 	}
 
-	private static void develop(Minecraft client, NativeImage image, long shotNonce) {
+	private static void develop(Minecraft client, NativeImage image, long shotNonce, int shotDetail, int shotShadow) {
 		byte[] pixels;
 		try (image) {
-			pixels = Darkroom.develop(image::getPixel, image.getWidth(), image.getHeight(), shotNonce);
+			pixels = Darkroom.develop(image::getPixel, image.getWidth(), image.getHeight(), shotNonce, shotDetail, shotShadow);
 		} catch (RuntimeException e) {
 			Unseen.LOGGER.warn("Photo failed to develop", e);
 			return;

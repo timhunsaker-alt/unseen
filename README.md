@@ -34,15 +34,35 @@ player, slowly gets bolder, and waits for moments when nobody is looking.
 | `witness` | Dread 2+, animals nearby | Every animal stops and stares at the same empty spot behind you. A pet may growl or hiss. |
 | `bell` | Dread 3+, at night, outdoors | One bell, far away. Roughly once per world. |
 | `bedturn` (not random; hooks into waking) | Dread 3+ | You wake up facing the wall, not the room. Use `/unseen trigger bedturn` then sleep. |
+| `heartbeat` | Dread 3+ | Your own heartbeat, soft and low, only you can hear it. It speeds up, then stops. |
+
+### After the dragon (dread 6)
+
+When the Ender Dragon dies, everyone who was in the fight enters **the quiet**: a full in-game day with nothing at all,
+even at maximum dread. Then dread 6 begins: events come more often (a 2 minute wait between them instead of 4, and
+shorter cooldowns on each), and these appear:
+
+| Scare | What you find |
+|---|---|
+| `logbook` | An unsigned book listing what you did, in detail: when, where, what you were doing and for how long (underground, swimming, hurt, asleep, in the Nether, in the End). Written from what it noted about you. |
+| `wander` | At night, lit candles appear in your house and drift from room to room, **even while you watch**. As you come near they vanish, and your heartbeat starts. |
+| `return` | Once, while you are away: a candle lit by your bed, a door standing open, a flower on the doorstep. |
+| `wingbeats` | Far away at night, slow wingbeats pass overhead and fade. No roar. Nothing is there. |
+| (photo) | The sleeping photo happens every time, sharper, with a tall shadow in the frame that stands at the edge and gets closer in each new photo. |
+| (journal) | The note-taking book turns up more often. |
+
+Testing it without killing the dragon: `/unseen dragon slain` (starts the quiet), `/unseen dragon skipquiet` (ends it), `/unseen dragon clear`,
+or just `/unseen dread 6`.
 
 **Dread** (0 to 5) goes up by one for every in-game day you play. At dread 0 nothing
 happens at all, so new worlds feel normal. Higher dread means more frequent events.
 
 **The rules that keep it unseen:**
-- Nothing happens anywhere the player is looking (a wide 150° cone, walls ignored).
+- Nothing happens anywhere the player is looking (a wide 150° cone, walls ignored). The one exception is after the dragon, when wandering candles move in plain view.
 - It only acts when you're alone (nobody else within 32 blocks).
 - It learns where "home" is by watching where you sleep.
 - It never tells you anything. No chat messages, no advancements.
+- It never screams. No loud, shrill or sudden sounds: only quiet things, like footsteps, a knock, a far bell, wingbeats, and a soft heartbeat.
 
 ## Build and run
 
@@ -77,7 +97,7 @@ To rebuild after changes: `./gradlew build`, then copy `build/libs/unseen-0.1.0.
 Turn cheats on, then:
 
 ```
-/unseen dread 5                 skip ahead to max dread
+/unseen dread 5                 skip ahead to max dread (6 is the after-the-dragon level)
 /unseen trigger footprints      stand in snow, try it
 /unseen trigger footsteps       then walk around
 /unseen trigger photo           then go to sleep (needs a chest near the bed)

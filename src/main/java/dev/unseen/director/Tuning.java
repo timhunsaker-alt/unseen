@@ -17,7 +17,9 @@ public final class Tuning {
 
 	/** Dread goes up by one for every this-many ticks a player has spent in the world. */
 	public static final long TICKS_PER_DREAD = GAME_DAY;
-	public static final int MAX_DREAD = 5;
+	/** Time alone only gets you to this level. Level 6 is earned by defeating the dragon. */
+	public static final int TIME_DREAD_CAP = 5;
+	public static final int MAX_DREAD = 6;
 
 	// --- How often the director considers doing something ---
 
@@ -25,11 +27,11 @@ public final class Tuning {
 	public static final int CHECK_INTERVAL = 30 * SECOND;
 
 	/** Chance that a roll turns into an event, by dread level 0..5. */
-	public static final double[] EVENT_CHANCE = {0.0, 0.15, 0.22, 0.30, 0.38, 0.45};
+	public static final double[] EVENT_CHANCE = {0.0, 0.15, 0.22, 0.30, 0.38, 0.45, 0.65};
 
 	/** Minimum quiet time between any two events, by dread level 0..5. */
 	public static final int[] QUIET_TIME = {
-			Integer.MAX_VALUE, 12 * MINUTE, 9 * MINUTE, 7 * MINUTE, 5 * MINUTE, 4 * MINUTE};
+			Integer.MAX_VALUE, 12 * MINUTE, 9 * MINUTE, 7 * MINUTE, 5 * MINUTE, 4 * MINUTE, 2 * MINUTE};
 
 	// --- Rules that keep it unseen ---
 
@@ -217,4 +219,94 @@ public final class Tuning {
 	public static final double BED_TURN_CHANCE = 0.3;
 	/** Walls farther than this from where you wake don't count. */
 	public static final int BED_TURN_WALL_RANGE = 4;
+
+	// ================================================================================
+	// After the dragon. The rules below only apply at dread 6.
+	// The mod never screams. Loud, shrill or sudden sounds are not part of it; keep every sound here soft.
+	// ================================================================================
+
+	/** Silence after the dragon dies, even at maximum dread. The next thing lands harder for it. */
+	public static final long POST_DRAGON_QUIET = GAME_DAY;
+	/** How far from the dragon a player counts as having been in the fight. */
+	public static final double DRAGON_CREDIT_RADIUS = 192.0;
+	/** At dread 6 every event's cooldown is multiplied by this (smaller means more often). */
+	public static final double DREAD6_COOLDOWN_FACTOR = 0.4;
+	/** Sleeping photo at dread 6. */
+	public static final double DREAD6_PHOTO_CHANCE = 1.0;
+	public static final long DREAD6_PHOTO_COOLDOWN = GAME_DAY;
+	/** Shadow figure steps through this many photos, getting closer each time. */
+	public static final int PHOTO_SHADOW_STEPS = 8;
+
+	// --- What it writes down: how often it notes where you are and what you're doing ---
+
+	public static final int ACTIVITY_SAMPLE_SECONDS = 60;
+	public static final int ACTIVITY_MAX_ENTRIES = 40;
+	/** Staying within this many blocks, doing the same thing, counts as the same entry. */
+	public static final double ACTIVITY_SAME_PLACE = 48.0;
+
+	// --- Logbook (a book that lists what you did, in detail) ---
+
+	public static final int LOGBOOK_MIN_DREAD = 6;
+	public static final long LOGBOOK_COOLDOWN = GAME_DAY / 2;
+	public static final double LOGBOOK_MIN_PLAYER_DISTANCE = 20.0;
+	public static final int LOGBOOK_MAX_ENTRIES = 14;
+	public static final int LOGBOOK_WEIGHT = 18;
+
+	// --- Heartbeat (a slow pulse only you can hear, speeding up, then it stops) ---
+
+	public static final int HEARTBEAT_MIN_DREAD = 3;
+	public static final long HEARTBEAT_COOLDOWN = GAME_DAY / 2;
+	public static final int HEARTBEAT_BEATS_MIN = 12;
+	public static final int HEARTBEAT_BEATS_MAX = 20;
+	/** Dread 6 runs longer and faster. */
+	public static final int HEARTBEAT_BEATS_MIN_6 = 24;
+	public static final int HEARTBEAT_BEATS_MAX_6 = 40;
+	public static final double HEARTBEAT_BPM_START = 62;
+	public static final double HEARTBEAT_BPM_END = 96;
+	public static final double HEARTBEAT_BPM_END_6 = 112;
+	public static final float HEARTBEAT_VOLUME_START = 0.30F;
+	public static final float HEARTBEAT_VOLUME_END = 0.75F;
+	/** Pitch of the thud. Lower is deeper; 0.5 is as low as the game goes. */
+	public static final float HEARTBEAT_PITCH = 0.5F;
+
+	// --- Wingbeats (soft, far away, at night, with nothing there) ---
+
+	public static final int WINGBEATS_MIN_DREAD = 6;
+	public static final long WINGBEATS_COOLDOWN = GAME_DAY / 2;
+	public static final int WINGBEATS_COUNT = 4;
+	public static final int WINGBEATS_GAP = 26;
+	public static final int WINGBEATS_DISTANCE = 45;
+	public static final float WINGBEATS_VOLUME = 2.5F;
+	public static final float WINGBEATS_PITCH = 0.8F;
+
+	// --- Wandering candles (placed in your house, they move at night, even while you watch, and vanish as you come near) ---
+
+	public static final int WANDER_MIN_DREAD = 6;
+	public static final long WANDER_COOLDOWN = 8L * MINUTE;
+	public static final int WANDER_WEIGHT = 22;
+	public static final int WANDER_MIN_CANDLES = 1;
+	public static final int WANDER_MAX_CANDLES = 3;
+	/** The player has to be this close to the bed for it to start. */
+	public static final double WANDER_PLAYER_RADIUS = 20.0;
+	/** Starting spots are at least this far from the player, so it is first seen across the room. */
+	public static final double WANDER_MIN_START_DISTANCE = 8.0;
+	/** The candle is gone once the player is this close. */
+	public static final double WANDER_VANISH_DISTANCE = 7.0;
+	/** Ticks between hops, and how far one hop goes. */
+	public static final int WANDER_HOP_MIN = 30;
+	public static final int WANDER_HOP_MAX = 80;
+	public static final int WANDER_HOP_RANGE = 2;
+	/** How often it checks how close you are. */
+	public static final int WANDER_CHECK_TICKS = 4;
+	public static final long WANDER_LIFETIME = 2L * MINUTE;
+	/** Records of candles older than this are cleaned up if a restart left one behind. */
+	public static final long WANDER_FORGET_AFTER = 5L * MINUTE;
+	/** Heartbeat when one vanishes on you. */
+	public static final int WANDER_VANISH_BEATS = 8;
+
+	// --- The return (while you were away: candles by the bed, the door open, a flower on the step) ---
+
+	public static final int RETURN_MIN_DREAD = 6;
+	public static final double RETURN_MIN_PLAYER_DISTANCE = 24.0;
+	public static final int RETURN_WEIGHT = 40;
 }

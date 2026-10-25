@@ -9,7 +9,7 @@ public class UnseenClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(SnapRequestPayload.TYPE,
-				(payload, context) -> PhotoCamera.request(payload.nonce()));
+				(payload, context) -> PhotoCamera.request(payload.nonce(), payload.detail(), payload.shadow()));
 		ClientTickEvents.END_CLIENT_TICK.register(PhotoCamera::tick);
 		TitleBackground.register();
 	}

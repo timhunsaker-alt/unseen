@@ -20,7 +20,8 @@ import net.minecraft.server.level.ServerPlayer;
  *
  *   /unseen status
  *   /unseen trigger <event id (tab-complete lists them)|photo|bedturn>
- *   /unseen dread <0-5>      (or -1 to go back to normal)
+ *   /unseen dread <0-6>      (or -1 to go back to normal); 6 is the after-the-dragon level
+ *   /unseen dragon <slain|skipquiet|clear>   pretend the dragon was beaten (or undo it)
  */
 public final class UnseenCommand {
 	private UnseenCommand() {
@@ -41,6 +42,15 @@ public final class UnseenCommand {
 									return builder.buildFuture();
 								})
 								.executes(UnseenCommand::trigger)))
+				.then(Commands.literal("dragon")
+						.then(Commands.argument("mode", StringArgumentType.word())
+								.suggests((ctx, builder) -> {
+									builder.suggest("slain");
+									builder.suggest("skipquiet");
+									builder.suggest("clear");
+									return builder.buildFuture();
+								})
+								.executes(UnseenCommand::dragon)))
 				.then(Commands.literal("dread")
 						.then(Commands.argument("level", IntegerArgumentType.integer(-1, Tuning.MAX_DREAD))
 								.executes(UnseenCommand::dread))));
@@ -95,6 +105,24 @@ public final class UnseenCommand {
 		}
 		ctx.getSource().sendFailure(Component.literal("Unknown event: " + id));
 		return 0;
+	}
+
+	private static int dragon(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		ServerPlayer player = ctx.getSource().getPlayerOrException();
+		PlayerRecord record = Director.get().record(player);
+		String mode = StringArgumentType.getString(ctx, "mode");
+		if (record == null || !(mode.equals("slain") || mode.equals("skipquiet") || mode.equals("clear"))) {
+			ctx.getSource().sendFailure(Component.literal("Use: /unseen dragon <slain|skipquiet|clear>"));
+			return 0;
+		}
+		Director.get().debugDragon(record, mode);
+		String message = switch (mode) {
+			case "slain" -> "Dragon marked as beaten. The quiet has started; dread 6 follows when it ends.";
+			case "skipquiet" -> "Dragon marked as beaten and the quiet is over. Dread is now " + record.dread() + ".";
+			default -> "Dragon forgotten. Back to normal.";
+		};
+		ctx.getSource().sendSuccess(() -> Component.literal(message), false);
+		return 1;
 	}
 
 	private static int dread(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

@@ -44,6 +44,11 @@ public class JournalEvent implements HauntEvent {
 	}
 
 	@Override
+	public int weight(int dread) {
+		return dread >= Tuning.MAX_DREAD ? 16 : this.weight();
+	}
+
+	@Override
 	public boolean run(ServerPlayer player, PlayerRecord record, Random random) {
 		ServerLevel level = Senses.level(player);
 		BlockPos home = FootprintsEvent.homeIn(level, record);
